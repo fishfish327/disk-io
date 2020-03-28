@@ -30,7 +30,7 @@ void randomRead(char *fileName, size_t bufferSize){
     FILE *fp;
     bufferSize = bufferSize * 1024;
     
-    char * buff =(char *) malloc(bufferSize);
+    char * buff =(char *) malloc(bufferSize * sizeof(char));
     int repeat;
     int count;
     int total = 0;
@@ -157,15 +157,15 @@ void* thread_worker(void *data){
     }
 
 }
-void getfileNameList(char ** fileNameList, char * fileName){
+void getfileNameList(char ** fileNameList, char * configFileName, int n){
     FILE *fp;
-    bufferSize = bufferSize * 1024;
-    char * buff =(char *) malloc(bufferSize);
-    memset(buff, 'a', bufferSize);
-    int count;
-    int total = 0;
-
-    fp = fopen(fileName, "wb");
+    fp = fopen(configFileName, "r");
+    for(int i = 0; i < n; i++){
+        fileNameList[i] = (char *)malloc(255 * sizeof(char));
+        fgets(fileNameList[i], 255, fp);
+        printf("get file name : %s\n", fileNameList[i]);
+    }
+    fclose(fp);
 }
 void testWithConfig(global_config * config, char * fileName){
     test_config fileInfo;
@@ -180,7 +180,7 @@ int main(int argc, char *argv[]) {
     global_config globalConfig;
     test_config fileInfo;
     int numOfThreads;
-    char *fileName;
+    char *configFileName;
     char ** fileNameList;
     pthread_t * threadGroup;
 
@@ -206,7 +206,7 @@ int main(int argc, char *argv[]) {
                   numOfThreads = atoi(optarg);
                   break;
             case 'f':
-                  fileName = optarg;
+                  configFileName = optarg;
                   break; 
             case 'r':
                   globalConfig.read = 1;
@@ -223,20 +223,23 @@ int main(int argc, char *argv[]) {
         }
     }
     if(numOfThreads > 0){
-        fileNameList =(char **) malloc(numOfThreads);
-        threadGroup = (pthread_t *) malloc(numOfThreads);
-        getfileNameList(fileNameList, fileName);
+        fileNameList =(char **) malloc(numOfThreads * sizeof(char *));
+        threadGroup = (pthread_t *) malloc(numOfThreads * sizeof(pthread_t));
+        getfileNameList(fileNameList, configFileName, numOfThreads);
         // lauch thread to execute
         for(int i = 0; i < numOfThreads; i++){
-            testConfig configPerThread;
-            configPerThread.globalConfig = globalConfig;
+            test_config configPerThread;
+            configPerThread.globalConfig = &globalConfig;
             configPerThread.fileName = fileNameList[i];
-            pthread_create(&threadGroup[i], NULL, thread_worker, configPerThread);
+            pthread_create(&threadGroup[i], NULL, thread_worker, &configPerThread);
         }
 
         // join per thread
         for(int i = 0; i < numOfThreads; i++){
             pthread_join(threadGroup[i], NULL);
+        }
+        for(int i = 0; i < numOfThreads; i++){
+            free(fileNameList[i]);
         }
         free(fileNameList);
         free(threadGroup);
