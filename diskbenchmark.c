@@ -96,6 +96,7 @@ void sequentialRead(char *fileName, size_t bufferSize){
     while(1){
            count = fread(buff, sizeof(char), bufferSize, fp);
 	   fflush(fp);
+	   fsync(fileno(fp));
 //         printf("count is : %d\n", count);
            total += count;
            if(count < bufferSize){
