@@ -1,5 +1,7 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <stddef.h>
 #include <string.h>
 #include <sys/types.h>
@@ -10,14 +12,18 @@
 #define BUFFER_SIZE3 1024
 #define BUFFER_SIZE4 16 * 1024
 
-typedef struct testconf {
-    char * fileName;
+typedef struct globalconf {
     int read;
     int write;
     int random;
     int sequential;
     size_t bufferSize;
     size_t fileSize;
+} global_config;
+
+typedef struct testconf {
+    char * fileName;
+    global_config * globalConfig;
 } test_config;
 
 void randomRead(char *fileName, size_t bufferSize){
@@ -67,6 +73,7 @@ void randomWrite(char *fileName, size_t bufferSize, size_t fileSize){
         int randomIndex = rand() % repeat;
         fseek(fp, randomIndex * bufferSize, SEEK_SET);
         count = fwrite(buff, sizeof(char), bufferSize, fp);
+        fflush(fp);
         printf("count is : %d", count);
         total += count;
     }
@@ -129,36 +136,111 @@ void sequentialWrite(char * fileName, size_t bufferSize, size_t fileSize){
     free(buff);
 }
 void* thread_worker(void *data){
-    test_config * ioConfig = (test_config *) data;
+    test_config * testConfig = (test_config *) data;
+    char *fileName = testConfig -> fileName;
+    global_config * ioConfig = testConfig -> globalConfig;
     if(ioConfig -> read == 1 && ioConfig -> sequential == 1){
-        sequentialRead( ioConfig -> fileName, ioConfig -> bufferSize);
+        sequentialRead(fileName, ioConfig -> bufferSize);
         return NULL;
     }
     if(ioConfig -> write == 1 && ioConfig -> sequential == 1){
-        sequentialWrite(ioConfig -> fileName, ioConfig -> bufferSize, ioConfig -> fileSize);
+        sequentialWrite(fileName, ioConfig -> bufferSize, ioConfig -> fileSize);
         return NULL;
     }
     if(ioConfig -> read == 1 && ioConfig -> random == 1){
-        randomRead( ioConfig -> fileName, ioConfig -> bufferSize);
+        randomRead(fileName, ioConfig -> bufferSize);
         return NULL;
     }
     if(ioConfig -> write == 1 && ioConfig -> random == 1){
-        randomWrite(ioConfig -> fileName, ioConfig -> bufferSize, ioConfig -> fileSize);
+        randomWrite(fileName, ioConfig -> bufferSize, ioConfig -> fileSize);
         return NULL;
     }
 
 }
-int main() {
+void getfileNameList(char ** fileNameList, char * fileName){
+    FILE *fp;
+    bufferSize = bufferSize * 1024;
+    char * buff =(char *) malloc(bufferSize);
+    memset(buff, 'a', bufferSize);
+    int count;
+    int total = 0;
+
+    fp = fopen(fileName, "wb");
+}
+void testWithConfig(global_config * config, char * fileName){
     test_config fileInfo;
-    fileInfo.write = 1;
-    fileInfo.random = 1;
-    fileInfo.fileSize = 21335;
-    fileInfo.fileName = "/tmp/test.txt";
-    fileInfo.bufferSize = BUFFER_SIZE1;
+    fileInfo.globalConfig = config;
+    fileInfo.fileName = fileName;
     pthread_t t1;
     pthread_create(&t1, NULL, thread_worker, &fileInfo);
     pthread_join(t1, NULL);
-    //sequentialRead("/tmp/test.txt", SIZE1); 
-    //sequentialWrite("/tmp/test.txt", BUFFER_SIZE1, 213329);
+}
+int main(int argc, char *argv[]) {
+    int c;
+    global_config globalConfig;
+    test_config fileInfo;
+    int numOfThreads;
+    char *fileName;
+    char ** fileNameList;
+    pthread_t * threadGroup;
+
+    // parse arg
+    while( -1 != (c = getopt(argc, argv,
+          "b:"  /* block size */
+          "s:"  /* size (bytes) to read/write */
+          "n:"  /* num read threads */
+          "f:"  /* file name */
+          "r"  /* read operation*/
+          "w"  /* write operation*/
+          "S"  /* sequential read & write*/
+          "R"  /* random read & write*/
+    ))){
+        switch (c) {
+            case 'b':
+                  globalConfig.bufferSize =  (off_t)strtoul(optarg, NULL, 10);
+                  break;
+            case 's':
+                  globalConfig.fileSize =  (off_t)strtoul(optarg, NULL, 10);
+                  break;
+            case 'n':
+                  numOfThreads = atoi(optarg);
+                  break;
+            case 'f':
+                  fileName = optarg;
+                  break; 
+            case 'r':
+                  globalConfig.read = 1;
+                  break;
+            case 'w':
+                  globalConfig.write = 1;
+                  break;
+            case 'S':
+                  globalConfig.sequential = 1;
+                  break;
+            case 'R':
+                  globalConfig.random = 1;
+                  break;
+        }
+    }
+    if(numOfThreads > 0){
+        fileNameList =(char **) malloc(numOfThreads);
+        threadGroup = (pthread_t *) malloc(numOfThreads);
+        getfileNameList(fileNameList, fileName);
+        // lauch thread to execute
+        for(int i = 0; i < numOfThreads; i++){
+            testConfig configPerThread;
+            configPerThread.globalConfig = globalConfig;
+            configPerThread.fileName = fileNameList[i];
+            pthread_create(&threadGroup[i], NULL, thread_worker, configPerThread);
+        }
+
+        // join per thread
+        for(int i = 0; i < numOfThreads; i++){
+            pthread_join(threadGroup[i], NULL);
+        }
+        free(fileNameList);
+        free(threadGroup);
+    }
+    
     return 0;
 }
