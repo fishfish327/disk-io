@@ -33,7 +33,7 @@ void randomRead(char *fileName, size_t bufferSize){
     char * buff =(char *) malloc(bufferSize * sizeof(char));
     int repeat;
     int count;
-    int total = 0;
+    size_t total = 0;
     
     // open file
     fp = fopen(fileName, "rb");
@@ -49,7 +49,7 @@ void randomRead(char *fileName, size_t bufferSize){
         //printf("count is : %d", count);
         total += count;
     }
-    printf("total read bytes is : %d\n", total);
+    printf("total read bytes is : %ld\n", total);
 
     fclose(fp);
     free(buff);
@@ -63,7 +63,7 @@ void randomWrite(char *fileName, size_t bufferSize, size_t fileSize){
     memset(buff, 'a', bufferSize);
     int repeat;
     int count;
-    int total = 0;
+    size_t total = 0;
 
      // open file
     fp = fopen(fileName, "wb");
@@ -77,7 +77,7 @@ void randomWrite(char *fileName, size_t bufferSize, size_t fileSize){
         //printf("count is : %d", count);
         total += count;
     }
-    printf("total write bytes is : %d\n", total);
+    printf("total write bytes is : %ld\n", total);
 
     fclose(fp);
     free(buff);
@@ -87,20 +87,20 @@ void sequentialRead(char *fileName, size_t bufferSize){
     bufferSize = bufferSize * 1024;
     char * buff =(char *) malloc(bufferSize);
     int count;
-    int total = 0;
+    size_t total = 0;
     
     
     
     fp = fopen(fileName, "rb");
     while(1){
            count = fread(buff, sizeof(char), bufferSize, fp);
-           printf("count is : %d\n", count);
+//           printf("count is : %d\n", count);
            total += count;
            if(count < bufferSize){
                break;
            }
     }
-    printf("total read bytes is : %d\n", total);
+    printf("total read bytes is : %ld\n", total);
 
     fclose(fp);
     free(buff);
@@ -111,7 +111,7 @@ void sequentialWrite(char * fileName, size_t bufferSize, size_t fileSize){
     char * buff =(char *) malloc(bufferSize);
     memset(buff, 'a', bufferSize);
     int count;
-    int total = 0;
+    size_t total = 0;
 
     fp = fopen(fileName, "wb");
    
@@ -130,7 +130,7 @@ void sequentialWrite(char * fileName, size_t bufferSize, size_t fileSize){
            }
            
     }
-    printf("total write bytes is : %d\n", total);
+    printf("total write bytes is : %ld\n", total);
 
     fclose(fp);
     free(buff);
