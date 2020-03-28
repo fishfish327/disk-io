@@ -159,10 +159,18 @@ void* thread_worker(void *data){
 }
 void getfileNameList(char ** fileNameList, char * configFileName, int n){
     FILE *fp;
+    char *find;
     fp = fopen(configFileName, "r");
     for(int i = 0; i < n; i++){
         fileNameList[i] = (char *)malloc(255 * sizeof(char));
         fgets(fileNameList[i], 255, fp);
+
+        find = strchr(fileNameList[i], '\n');          //查找换行符
+        if(find){
+           //如果find不为空指针
+           *find = '\0';   
+        }                            
+             
         printf("get file name : %s\n", fileNameList[i]);
     }
     fclose(fp);
