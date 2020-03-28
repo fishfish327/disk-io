@@ -122,11 +122,13 @@ void sequentialWrite(char * fileName, size_t bufferSize, size_t fileSize){
            if(fileSize - total >= bufferSize){
                 count = fwrite(buff, sizeof(char), bufferSize, fp);
                 fflush(fp);
+                fsync(fileno(fp));
                 //printf("count is : %d", count);
                 total += count;
            } else {
                 count = fwrite(buff, sizeof(char), fileSize - total, fp);
                 fflush(fp);
+                fsync(fileno(fp));
                 //printf("count is : %d", count);
                 total += count;
                 break;
