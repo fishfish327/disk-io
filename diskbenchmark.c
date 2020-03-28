@@ -46,10 +46,10 @@ void randomRead(char *fileName, size_t bufferSize){
         int randomIndex = rand() % repeat;
         fseek(fp, randomIndex * bufferSize, SEEK_SET);
         count = fread(buff, sizeof(char), bufferSize, fp);
-        printf("count is : %d", count);
+        //printf("count is : %d", count);
         total += count;
     }
-    printf("total read bytes is : %d", total);
+    printf("total read bytes is : %d\n", total);
 
     fclose(fp);
     free(buff);
@@ -74,10 +74,10 @@ void randomWrite(char *fileName, size_t bufferSize, size_t fileSize){
         fseek(fp, randomIndex * bufferSize, SEEK_SET);
         count = fwrite(buff, sizeof(char), bufferSize, fp);
         fflush(fp);
-        printf("count is : %d", count);
+        //printf("count is : %d", count);
         total += count;
     }
-    printf("total write bytes is : %d", total);
+    printf("total write bytes is : %d\n", total);
 
     fclose(fp);
     free(buff);
@@ -94,13 +94,13 @@ void sequentialRead(char *fileName, size_t bufferSize){
     fp = fopen(fileName, "rb");
     while(1){
            count = fread(buff, sizeof(char), bufferSize, fp);
-           printf("count is : %d", count);
+           printf("count is : %d\n", count);
            total += count;
            if(count < bufferSize){
                break;
            }
     }
-    printf("total read bytes is : %d", total);
+    printf("total read bytes is : %d\n", total);
 
     fclose(fp);
     free(buff);
@@ -119,18 +119,18 @@ void sequentialWrite(char * fileName, size_t bufferSize, size_t fileSize){
            if(fileSize - total >= bufferSize){
                 count = fwrite(buff, sizeof(char), bufferSize, fp);
                 fflush(fp);
-                printf("count is : %d", count);
+                //printf("count is : %d", count);
                 total += count;
            } else {
                 count = fwrite(buff, sizeof(char), fileSize - total, fp);
                 fflush(fp);
-                printf("count is : %d", count);
+                //printf("count is : %d", count);
                 total += count;
                 break;
            }
            
     }
-    printf("total write bytes is : %d", total);
+    printf("total write bytes is : %d\n", total);
 
     fclose(fp);
     free(buff);
@@ -139,6 +139,7 @@ void* thread_worker(void *data){
     test_config * testConfig = (test_config *) data;
     char *fileName = testConfig -> fileName;
     global_config * ioConfig = testConfig -> globalConfig;
+    printf("lauch a thread for io on : %s\n", fileName);
     if(ioConfig -> read == 1 && ioConfig -> sequential == 1){
         sequentialRead(fileName, ioConfig -> bufferSize);
         return NULL;
@@ -175,14 +176,7 @@ void getfileNameList(char ** fileNameList, char * configFileName, int n){
     }
     fclose(fp);
 }
-void testWithConfig(global_config * config, char * fileName){
-    test_config fileInfo;
-    fileInfo.globalConfig = config;
-    fileInfo.fileName = fileName;
-    pthread_t t1;
-    pthread_create(&t1, NULL, thread_worker, &fileInfo);
-    pthread_join(t1, NULL);
-}
+
 int main(int argc, char *argv[]) {
     int c;
     global_config globalConfig;
@@ -197,7 +191,7 @@ int main(int argc, char *argv[]) {
           "b:"  /* block size */
           "s:"  /* size (bytes) to read/write */
           "n:"  /* num read threads */
-          "f:"  /* file name */
+          "f:"  /* config file name */
           "r"  /* read operation*/
           "w"  /* write operation*/
           "S"  /* sequential read & write*/
