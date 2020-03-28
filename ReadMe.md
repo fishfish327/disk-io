@@ -1,5 +1,5 @@
 ##### how to compile
-gcc diskbenchmark.c -o diskbenchmark.c -lpthread
+gcc diskbenchmark.c -o diskbenchmark -lpthread
 ##### config file example
 ```txt
 ./t1.txt
