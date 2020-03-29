@@ -9,7 +9,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <time.h>
-#include <<malloc.h>
+#include <malloc.h>
 
 #define BUFFER_SIZE1 4
 #define BUFFER_SIZE2 16
