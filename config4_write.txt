@@ -1,0 +1,4 @@
+../test4/4_1_w.txt
+../test4/4_2_w.txt
+../test4/4_3_w.txt
+../test4/4_4_w.txt

@@ -1,0 +1,12 @@
+../test12/12_1_w.txt
+../test12/12_2_w.txt
+../test12/12_3_w.txt
+../test12/12_4_w.txt
+../test12/12_5_w.txt
+../test12/12_6_w.txt
+../test12/12_7_w.txt
+../test12/12_8_w.txt
+../test12/12_9_w.txt
+../test12/12_10_w.txt
+../test12/12_11_w.txt
+../test12/12_12_w.txt

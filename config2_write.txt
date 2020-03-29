@@ -1,0 +1,2 @@
+../test2/2_1_w.txt
+../test2/2_2_w.txt
