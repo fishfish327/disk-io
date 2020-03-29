@@ -47,7 +47,8 @@ void randomRead(char *fileName, size_t bufferSize){
         int randomIndex = rand() % repeat;
         fseek(fp, randomIndex * bufferSize, SEEK_SET);
         count = fread(buff, sizeof(char), bufferSize, fp);
-	fflush(fp);
+	    fflush(fp);
+        fsync(fileno(fp));
         //printf("count is : %d", count);
         total += count;
     }
@@ -76,6 +77,7 @@ void randomWrite(char *fileName, size_t bufferSize, size_t fileSize){
         fseek(fp, randomIndex * bufferSize, SEEK_SET);
         count = fwrite(buff, sizeof(char), bufferSize, fp);
         fflush(fp);
+        fsync(fileno(fp));
         //printf("count is : %d", count);
         total += count;
     }
@@ -96,8 +98,8 @@ void sequentialRead(char *fileName, size_t bufferSize){
     fp = fopen(fileName, "rb");
     while(1){
            count = fread(buff, sizeof(char), bufferSize, fp);
-	   fflush(fp);
-	   fsync(fileno(fp));
+	       fflush(fp);
+	       fsync(fileno(fp));
 //         printf("count is : %d\n", count);
            total += count;
            if(count < bufferSize){
