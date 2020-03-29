@@ -262,7 +262,7 @@ int main(int argc, char *argv[]) {
         }
         time(&end_t);
         diff_t = difftime(end_t, start_t);
-        throughput = getThroughput(diff_t, 10240);
+        throughput = getThroughput(diff_t, totalFileSize);
         printf("Execution time = %f\n", diff_t);
         printf("IO throughput is: %f\n", throughput);
         printf("Exiting of the program...\n");
