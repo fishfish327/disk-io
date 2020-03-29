@@ -249,11 +249,11 @@ int main(int argc, char *argv[]) {
         getfileNameList(fileNameList, configFileName, numOfThreads);
         time(&start_t);
         // lauch thread to execute
+        test_config *configGroup = malloc(numOfThreads * sizeof(test_config));
         for(int i = 0; i < numOfThreads; i++){
-            test_config configPerThread;
-            configPerThread.globalConfig = &globalConfig;
-            configPerThread.fileName = fileNameList[i];
-            pthread_create(&threadGroup[i], NULL, thread_worker, &configPerThread);
+            configGroup[i].globalConfig = &globalConfig;
+            configGroup[i].fileName = fileNameList[i];
+            pthread_create(&threadGroup[i], NULL, thread_worker, &configGroup[i]);
         }
 
         // join per thread
@@ -271,6 +271,7 @@ int main(int argc, char *argv[]) {
         }
         free(fileNameList);
         free(threadGroup);
+        free(configGroup);
     }
     
     return 0;
