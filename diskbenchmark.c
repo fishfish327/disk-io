@@ -96,6 +96,8 @@ void sequentialRead(char *fileName, size_t bufferSize){
     
     
     fp = fopen(fileName, "rb");
+    // set no buffer
+    //setvbuf(fp, NULL, _IONBF, 0);
     while(1){
            count = fread(buff, sizeof(char), bufferSize, fp);
 	       fflush(fp);
