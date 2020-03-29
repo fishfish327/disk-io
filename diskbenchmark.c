@@ -1,10 +1,12 @@
 #include <ctype.h>
+#include <sys/types.h> 
+#include <sys/stat.h> 
+#include <fcntl.h> 
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <stddef.h>
 #include <string.h>
-#include <sys/types.h>
 #include <pthread.h>
 #include <time.h>
 
@@ -86,8 +88,32 @@ void randomWrite(char *fileName, size_t bufferSize, size_t fileSize){
     fclose(fp);
     free(buff);
 }
+
+void readS(char * fileName, size_t bufferSize){
+    bufferSize = bufferSize * 1024;
+    char * buff =(char *) malloc(bufferSize);
+    int count;
+    size_t total = 0;
+
+    int fd;
+
+    // open file
+    fd = open(fileName, O_RDONLY | O_SYNC);
+
+    while(1){
+        count = read(fd, buff, bufferSize);
+        total += count;
+        if(count < bufferSize){
+            break;
+        }
+    }
+    printf("total read bytes is : %ld\n", total);
+
+    close(fd);
+    free(buff);
+}
 void sequentialRead(char *fileName, size_t bufferSize){
-    FILE *fp;
+    /*FILE *fp;
     bufferSize = bufferSize * 1024;
     char * buff =(char *) malloc(bufferSize);
     int count;
@@ -111,7 +137,8 @@ void sequentialRead(char *fileName, size_t bufferSize){
     printf("total read bytes is : %ld\n", total);
 
     fclose(fp);
-    free(buff);
+    free(buff);*/
+    readS(fileName, bufferSize);
 }
 void sequentialWrite(char * fileName, size_t bufferSize, size_t fileSize){
     FILE *fp;
