@@ -98,7 +98,7 @@ void readS(char * fileName, size_t bufferSize){
     int fd;
 
     // open file
-    fd = open(fileName, O_RDONLY | O_SYNC);
+    fd = open(fileName, O_RDONLY | O_SYNC | O_DIRECT);
 
     while(1){
         count = read(fd, buff, bufferSize);
