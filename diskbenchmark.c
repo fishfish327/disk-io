@@ -6,6 +6,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <pthread.h>
+#include <time.h>
 
 #define BUFFER_SIZE1 4
 #define BUFFER_SIZE2 16
@@ -191,6 +192,10 @@ int main(int argc, char *argv[]) {
     char ** fileNameList;
     pthread_t * threadGroup;
 
+    // start time && end time
+    time_t start_t, end_t;
+    double diff_t;
+
     // parse arg
     while( -1 != (c = getopt(argc, argv,
           "b:"  /* block size */
@@ -233,6 +238,7 @@ int main(int argc, char *argv[]) {
         fileNameList =(char **) malloc(numOfThreads * sizeof(char *));
         threadGroup = (pthread_t *) malloc(numOfThreads * sizeof(pthread_t));
         getfileNameList(fileNameList, configFileName, numOfThreads);
+        time(&start_t);
         // lauch thread to execute
         for(int i = 0; i < numOfThreads; i++){
             test_config configPerThread;
@@ -245,6 +251,11 @@ int main(int argc, char *argv[]) {
         for(int i = 0; i < numOfThreads; i++){
             pthread_join(threadGroup[i], NULL);
         }
+        time(&end_t);
+        diff_t = difftime(end_t, start_t);
+
+        printf("Execution time = %f\n", diff_t);
+        printf("Exiting of the program...\n");
         for(int i = 0; i < numOfThreads; i++){
             free(fileNameList[i]);
         }
