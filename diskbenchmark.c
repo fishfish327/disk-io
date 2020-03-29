@@ -11,11 +11,6 @@
 #include <time.h>
 #include <malloc.h>
 
-#define BUFFER_SIZE1 4
-#define BUFFER_SIZE2 16
-#define BUFFER_SIZE3 1024
-#define BUFFER_SIZE4 16 * 1024
-
 typedef struct globalconf {
     int read;
     int write;
@@ -31,66 +26,60 @@ typedef struct testconf {
 } test_config;
 
 void randomRead(char *fileName, size_t bufferSize){
-    FILE *fp;
+    int fd;
     bufferSize = bufferSize * 1024;
-    
-    char * buff =(char *) malloc(bufferSize * sizeof(char));
+    char * buff =(char *) memalign(1024, bufferSize);
     int repeat;
     int count;
     size_t total = 0;
-    
+
     // open file
-    fp = fopen(fileName, "rb");
+    fd = open(fileName, O_RDONLY | O_DIRECT);
+
     // get fileSize
-    fseek(fp, 0, SEEK_END);
-    size_t fileSize = ftell(fp);
+    lseek(fd, 0, SEEK_END);
+    size_t fileSize = lseek(fd, 0, SEEK_CUR);;
     printf("file size is :%ld\n", fileSize);
     repeat = fileSize / bufferSize + 1;
     for(int i = 0; i < repeat; i++){
         int randomIndex = rand() % repeat;
-        fseek(fp, randomIndex * bufferSize, SEEK_SET);
-        count = fread(buff, sizeof(char), bufferSize, fp);
-	    fflush(fp);
-        fsync(fileno(fp));
-        //printf("count is : %d", count);
+        lseek(fd, randomIndex * bufferSize, SEEK_SET);
+        count = read(fd, buff, bufferSize);
         total += count;
     }
     printf("total read bytes is : %ld\n", total);
 
-    fclose(fp);
+    close(fd);
     free(buff);
 }
 
 void randomWrite(char *fileName, size_t bufferSize, size_t fileSize){
-    FILE *fp;
+    int fd;
     bufferSize = bufferSize * 1024;
     
-    char * buff =(char *) malloc(bufferSize);
+    char * buff =(char *) memalign(1024, bufferSize);
     memset(buff, 'a', bufferSize);
     int repeat;
     int count;
     size_t total = 0;
 
      // open file
-    fp = fopen(fileName, "wb");
+    fd = open(fileName, O_WRONLY | O_DIRECT);
     
     repeat = fileSize / bufferSize + 1;
     for(int i = 0; i < repeat; i++){
         int randomIndex = rand() % repeat;
-        fseek(fp, randomIndex * bufferSize, SEEK_SET);
-        count = fwrite(buff, sizeof(char), bufferSize, fp);
-        fflush(fp);
-        fsync(fileno(fp));
-        //printf("count is : %d", count);
+        lseek(fd, randomIndex * bufferSize, SEEK_SET);
+        count = write(fd, buff, bufferSize);
         total += count;
     }
     printf("total write bytes is : %ld\n", total);
 
-    fclose(fp);
+    close(fd);
     free(buff);
 }
 
-void readS(char * fileName, size_t bufferSize){
+void sequentialRead(char *fileName, size_t bufferSize){
     bufferSize = bufferSize * 1024;
     char * buff =(char *) memalign(1024, bufferSize);
     int count;
@@ -113,56 +102,23 @@ void readS(char * fileName, size_t bufferSize){
     close(fd);
     free(buff);
 }
-void sequentialRead(char *fileName, size_t bufferSize){
-    /*FILE *fp;
-    bufferSize = bufferSize * 1024;
-    char * buff =(char *) malloc(bufferSize);
-    int count;
-    size_t total = 0;
-    
-    
-    
-    fp = fopen(fileName, "rb");
-    // set no buffer
-    //setvbuf(fp, NULL, _IONBF, 0);
-    while(1){
-           count = fread(buff, sizeof(char), bufferSize, fp);
-	       fflush(fp);
-	       fsync(fileno(fp));
-//         printf("count is : %d\n", count);
-           total += count;
-           if(count < bufferSize){
-               break;
-           }
-    }
-    printf("total read bytes is : %ld\n", total);
-
-    fclose(fp);
-    free(buff);*/
-    readS(fileName, bufferSize);
-}
 void sequentialWrite(char * fileName, size_t bufferSize, size_t fileSize){
-    FILE *fp;
+    
     bufferSize = bufferSize * 1024;
-    char * buff =(char *) malloc(bufferSize);
+    char * buff =(char *) memalign(1024, bufferSize);
     memset(buff, 'a', bufferSize);
     int count;
     size_t total = 0;
+    int fd;
 
-    fp = fopen(fileName, "wb");
+    fd = open(fileName, O_WRONLY | O_DIRECT);
    
     while(1){
            if(fileSize - total >= bufferSize){
-                count = fwrite(buff, sizeof(char), bufferSize, fp);
-                fflush(fp);
-                fsync(fileno(fp));
-                //printf("count is : %d", count);
+                count = write(fd, buff, bufferSize);
                 total += count;
            } else {
-                count = fwrite(buff, sizeof(char), fileSize - total, fp);
-                fflush(fp);
-                fsync(fileno(fp));
-                //printf("count is : %d", count);
+                count = write(fd, buff, fileSize - total);
                 total += count;
                 break;
            }
@@ -170,7 +126,7 @@ void sequentialWrite(char * fileName, size_t bufferSize, size_t fileSize){
     }
     printf("total write bytes is : %ld\n", total);
 
-    fclose(fp);
+    close(fd);
     free(buff);
 }
 void* thread_worker(void *data){
