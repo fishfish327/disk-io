@@ -194,7 +194,7 @@ int main(int argc, char *argv[]) {
     char *configFileName;
     char ** fileNameList;
     pthread_t * threadGroup;
-
+    size_t totalFileSize;
     // start time && end time
     time_t start_t, end_t;
     double diff_t;
@@ -215,7 +215,8 @@ int main(int argc, char *argv[]) {
                   globalConfig.bufferSize =  (off_t)strtoul(optarg, NULL, 10);
                   break;
             case 's':
-                  globalConfig.fileSize =  (off_t)strtoul(optarg, NULL, 10);
+                  // use MB to represent file size
+                  totalFileSize =  (off_t)strtoul(optarg, NULL, 10);
                   break;
             case 'n':
                   numOfThreads = atoi(optarg);
@@ -240,6 +241,11 @@ int main(int argc, char *argv[]) {
     if(numOfThreads > 0){
         fileNameList =(char **) malloc(numOfThreads * sizeof(char *));
         threadGroup = (pthread_t *) malloc(numOfThreads * sizeof(pthread_t));
+        // for write operation we need a file size
+        if(globalConfig.write == 1){
+            // total file size : MB -> transfer to byte 
+            globalConfig.fileSize = (size_t)(totalFileSize * 1024 * 1024 / numOfThreads);
+        }
         getfileNameList(fileNameList, configFileName, numOfThreads);
         time(&start_t);
         // lauch thread to execute
