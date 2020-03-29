@@ -182,7 +182,10 @@ void getfileNameList(char ** fileNameList, char * configFileName, int n){
     }
     fclose(fp);
 }
-
+double getThroughput(double diff_t, size_t fileSize){
+    // fileSize is in MB
+    return (double)(fileSize / diff_t);
+}
 int main(int argc, char *argv[]) {
     int c;
     global_config globalConfig;
@@ -195,7 +198,7 @@ int main(int argc, char *argv[]) {
     // start time && end time
     time_t start_t, end_t;
     double diff_t;
-
+    double throughput;
     // parse arg
     while( -1 != (c = getopt(argc, argv,
           "b:"  /* block size */
@@ -253,8 +256,9 @@ int main(int argc, char *argv[]) {
         }
         time(&end_t);
         diff_t = difftime(end_t, start_t);
-
+        throughput = getThroughput(diff_t, 10240);
         printf("Execution time = %f\n", diff_t);
+        printf("IO throughput is: %f\n", throughput);
         printf("Exiting of the program...\n");
         for(int i = 0; i < numOfThreads; i++){
             free(fileNameList[i]);
