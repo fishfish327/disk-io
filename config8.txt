@@ -1,0 +1,8 @@
+../test8/8_1.txt
+../test8/8_2.txt
+../test8/8_3.txt
+../test8/8_4.txt
+../test8/8_5.txt
+../test8/8_6.txt
+../test8/8_7.txt
+../test8/8_8.txt
