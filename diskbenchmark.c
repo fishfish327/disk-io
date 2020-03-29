@@ -9,6 +9,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <time.h>
+#include <<malloc.h>
 
 #define BUFFER_SIZE1 4
 #define BUFFER_SIZE2 16
@@ -91,14 +92,14 @@ void randomWrite(char *fileName, size_t bufferSize, size_t fileSize){
 
 void readS(char * fileName, size_t bufferSize){
     bufferSize = bufferSize * 1024;
-    char * buff =(char *) malloc(bufferSize);
+    char * buff =(char *) memalign(1024, bufferSize);
     int count;
     size_t total = 0;
 
     int fd;
 
     // open file
-    fd = open(fileName, O_RDONLY | O_SYNC | O_DIRECT);
+    fd = open(fileName, O_RDONLY | O_DIRECT);
 
     while(1){
         count = read(fd, buff, bufferSize);
