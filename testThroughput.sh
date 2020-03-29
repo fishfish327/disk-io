@@ -18,7 +18,7 @@ for num_thread in ${num_threads[@]}
 do 
     filename="config${num_thread}.txt"
     #echo $filename
-    ./diskbenchmark -r -R -b $recordSize -n num_thread -f $filename
+    ./diskbenchmark -r -R -b $recordSize -n $num_thread -f $filename
 done
 
 # sequetial write test
@@ -27,7 +27,7 @@ for num_thread in ${num_threads[@]}
 do 
     filename="config${num_thread}_write.txt"
     echo $filename
-    ./diskbenchmark -w -S -b $recordSize -n num_thread -f $filename -s 10240
+    ./diskbenchmark -w -S -b $recordSize -n $num_thread -f $filename -s 10240
 done
 
 # random write test
@@ -36,5 +36,5 @@ for num_thread in ${num_threads[@]}
 do 
     filename="config${num_thread}_write.txt"
     echo $filename
-    ./diskbenchmark -w -R -b $recordSize -n num_thread -f $filename -s 10240
+    ./diskbenchmark -w -R -b $recordSize -n $num_thread -f $filename -s 10240
 done
