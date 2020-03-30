@@ -11,7 +11,7 @@ for num_thread in ${num_threads[@]}
 do 
     filename="config${num_thread}_write.txt"
     echo $filename
-    ./diskbenchmark -r -R -b $recordSize -n $num_thread -f $filename -s $totalFileSize
+    ./diskbenchmark -w -S -b $recordSize -n $num_thread -f $filename -s $totalFileSize
 done
 
 # sequetial write test
