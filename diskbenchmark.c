@@ -111,7 +111,7 @@ void sequentialWrite(char * fileName, size_t bufferSize, size_t fileSize){
     size_t total = 0;
     int fd;
 
-    fd = open(fileName, O_WRONLY | O_DIRECT);
+    fd = open(fileName, O_WRONLY | O_DIRECT |O_TRUNC);
    
     while(1){
            if(fileSize - total >= bufferSize){
